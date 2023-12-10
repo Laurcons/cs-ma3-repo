@@ -19,4 +19,24 @@ class TripLeg {
     if (trainNum.startsWith("R")) return Colors.black;
     return Colors.white;
   }
+
+  Map<String, Object?> toMap() {
+    var map = <String, Object?>{
+      'trainNum': trainNum,
+      'depStation': depStation,
+      'arrStation': arrStation,
+      'depTime': depTime,
+      'arrTime': arrTime,
+      'observations': observations,
+    };
+    return map;
+  }
+
+  TripLeg.fromMap(Map<String, Object?> map)
+      : trainNum = map['trainNum'] as String,
+        depStation = map['depStation'] as String,
+        arrStation = map['arrStation'] as String,
+        depTime = map['depTime'] as String,
+        arrTime = map['arrTime'] as String,
+        observations = map['observations'] as String;
 }

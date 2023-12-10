@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uionly_flutter/src/repository.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg.dart';
 
 class AddTripLegView extends StatefulWidget {
@@ -120,16 +121,24 @@ class _State extends State<AddTripLegView> {
                     ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            Navigator.pop(
-                                context,
-                                TripLeg(
-                                  trainNum.text,
-                                  depStation.text,
-                                  arrStation.text,
-                                  depTime.text,
-                                  arrTime.text,
-                                  observations.text,
-                                ));
+                            var leg = TripLeg(
+                              trainNum.text,
+                              depStation.text,
+                              arrStation.text,
+                              depTime.text,
+                              arrTime.text,
+                              observations.text,
+                            );
+                            Repository.tryDatabaseOp(context, () async {
+                              if (widget.leg != null) {
+                                await Repository.instance
+                                    .updateOne(widget.leg!.trainNum, leg);
+                              } else {
+                                await Repository.instance.insertOne(leg);
+                              }
+                            }).then((_) {
+                              Navigator.pop(context, leg);
+                            });
                           }
                         },
                         child: Text(widget.leg == null

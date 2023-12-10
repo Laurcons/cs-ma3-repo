@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uionly_flutter/trip_legs/add_trip_leg_view.dart';
+import 'package:uionly_flutter/trip_legs/splash_view.dart';
 import 'package:uionly_flutter/trip_legs/trip_legs_list_view.dart';
 
 void main() {
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
       ),
       // home: ,
       routes: {
-        '/': (context) => const TripLegsListView(),
+        '/main': (context) => const TripLegsListView(),
+        '/': (context) => const SplashView(),
         '/add': (context) => const AddTripLegView(null)
       },
     );
