@@ -12,7 +12,7 @@ class SplashView extends StatelessWidget {
     await Repository.tryDatabaseOp(context, () async {
       await Repository.instance.init();
     }, exitOnFail: true);
-    await Future.delayed(const Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 1));
     if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, '/main');
   }

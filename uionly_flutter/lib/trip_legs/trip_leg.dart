@@ -9,9 +9,12 @@ class TripLeg {
   String depTime;
   String arrTime;
   String observations;
+  int v = -1;
 
   TripLeg(this.trainNum, this.depStation, this.arrStation, this.depTime,
       this.arrTime, this.observations);
+  TripLeg.withV(this.trainNum, this.depStation, this.arrStation, this.depTime,
+      this.arrTime, this.observations, this.v);
 
   Color colorFromRank() {
     if (trainNum.startsWith("IC")) return Colors.green;
@@ -29,6 +32,7 @@ class TripLeg {
       'arrTime': arrTime,
       'observations': observations,
     };
+    if (v != -1) map['v'] = v;
     return map;
   }
 
@@ -38,5 +42,6 @@ class TripLeg {
         arrStation = map['arrStation'] as String,
         depTime = map['depTime'] as String,
         arrTime = map['arrTime'] as String,
-        observations = map['observations'] as String;
+        observations = map['observations'] as String,
+        v = map.containsKey('v') ? map['v'] as int : -1;
 }

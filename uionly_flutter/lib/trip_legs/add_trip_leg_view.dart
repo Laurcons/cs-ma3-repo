@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uionly_flutter/src/api.dart';
+import 'package:uionly_flutter/src/oplog.dart';
 import 'package:uionly_flutter/src/repository.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg.dart';
 
@@ -133,8 +135,16 @@ class _State extends State<AddTripLegView> {
                               if (widget.leg != null) {
                                 await Repository.instance
                                     .updateOne(widget.leg!.trainNum, leg);
+                                await OpLog.instance.addAndTryOperation(
+                                    UpdateOperation(widget.leg!.trainNum,
+                                        widget.leg!.v, leg));
+                                // await IHateAPI.update(
+                                //     widget.leg!.trainNum, widget.leg!.v, leg);
                               } else {
                                 await Repository.instance.insertOne(leg);
+                                await OpLog.instance
+                                    .addAndTryOperation(CreateOperation(leg));
+                                // await IHateAPI.create(leg);
                               }
                             }).then((_) {
                               Navigator.pop(context, leg);

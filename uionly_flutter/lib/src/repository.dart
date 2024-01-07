@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -41,12 +40,13 @@ class Repository {
           "arrStation TEXT,"
           "depTime TEXT,"
           "arrTime TEXT,"
-          "observations TEXT"
+          "observations TEXT,"
+          "v INTEGER"
           ");");
 
       await db!.execute("INSERT INTO TripLegs VALUES"
-          "(\"IR1765\", \"Cluj-Napoca\", \"Iasi\", \"12:34\", \"23:45\", \"i hate this\"),"
-          "(\"R1234\", \"Unirea hc\", \"Bucuresti Nord (ew)\", \"01:23\", \"04:11\", \"BLEH BUCURESTI\")"
+          "(\"IR1765\", \"Cluj-Napoca\", \"Iasi\", \"12:34\", \"23:45\", \"i hate this\", 0),"
+          "(\"R1234\", \"Unirea hc\", \"Bucuresti Nord (ew)\", \"01:23\", \"04:11\", \"BLEH BUCURESTI\", 0)"
           ";");
     }
 
@@ -91,13 +91,24 @@ class Repository {
    * THANKS
    */
 
-  findAll() async {
+  Future<List<TripLeg>> findAll() async {
     var maps = await db!.query('TripLegs');
-    return maps.map(TripLeg.fromMap);
+    return maps.map<TripLeg>(TripLeg.fromMap).toList();
   }
 
   insertOne(TripLeg leg) async {
     await db!.insert('TripLegs', leg.toMap());
+  }
+
+  Future<bool> tryInsertOne(TripLeg leg) async {
+    final existing = await db!
+        .query('TripLegs', where: 'trainNum = ?', whereArgs: [leg.trainNum]);
+    log('train num ${leg.trainNum} count ${existing.length}');
+    if (existing.isEmpty) {
+      await insertOne(leg);
+      return true;
+    }
+    return false;
   }
 
   updateOne(String trainNum, TripLeg leg) async {
@@ -107,5 +118,19 @@ class Repository {
 
   deleteOne(String trainNum) async {
     await db!.delete('TripLegs', where: 'trainNum = ?', whereArgs: [trainNum]);
+  }
+
+  Future<bool> tryDeleteOne(String trainNum) async {
+    return await db!
+            .delete('TripLegs', where: 'trainNum = ?', whereArgs: [trainNum]) !=
+        0;
+  }
+
+  resetWithNewList(List<TripLeg> legs) async {
+    log('Resetting db with ${legs.length} entities');
+    await db!.delete('TripLegs');
+    await Future.wait(legs.map((l) async {
+      await insertOne(l);
+    }));
   }
 }
