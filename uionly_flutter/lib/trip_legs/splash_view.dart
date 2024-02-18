@@ -12,7 +12,7 @@ class SplashView extends StatelessWidget {
     await Repository.tryDatabaseOp(context, () async {
       await Repository.instance.init();
     }, exitOnFail: true);
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 0));
     if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, '/main');
   }
@@ -20,10 +20,10 @@ class SplashView extends StatelessWidget {
   String getRandomText() {
     var list = List.of([
       "Hold the f*** up",
-      "Get the hell out",
-      "I hate you",
-      "Your train is late anyway",
-      "You lost your train anyway",
+      "Wait a hot second",
+      "Don't be impatient!",
+      "What, you picked up sports?",
+      "You'll get tired anyway",
       "This app is Russian spyware"
     ]);
     final random = Random();

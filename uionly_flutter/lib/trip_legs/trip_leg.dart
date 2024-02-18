@@ -1,47 +1,41 @@
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
-
-class TripLeg {
-  String trainNum;
-  String depStation;
-  String arrStation;
-  String depTime;
-  String arrTime;
-  String observations;
+class FitnessActivity {
+  int id = -1;
+  String date;
+  String type;
+  double duration;
+  double calories;
+  String category;
+  String description;
   int v = -1;
 
-  TripLeg(this.trainNum, this.depStation, this.arrStation, this.depTime,
-      this.arrTime, this.observations);
-  TripLeg.withV(this.trainNum, this.depStation, this.arrStation, this.depTime,
-      this.arrTime, this.observations, this.v);
-
-  Color colorFromRank() {
-    if (trainNum.startsWith("IC")) return Colors.green;
-    if (trainNum.startsWith("IR")) return Colors.redAccent;
-    if (trainNum.startsWith("R")) return Colors.black;
-    return Colors.white;
-  }
+  FitnessActivity(this.date, this.type, this.duration, this.calories,
+      this.category, this.description);
+  FitnessActivity.withId(this.id, this.date, this.type, this.duration,
+      this.calories, this.category, this.description);
+  FitnessActivity.withV(this.id, this.date, this.type, this.duration,
+      this.calories, this.category, this.description, this.v);
 
   Map<String, Object?> toMap() {
     var map = <String, Object?>{
-      'trainNum': trainNum,
-      'depStation': depStation,
-      'arrStation': arrStation,
-      'depTime': depTime,
-      'arrTime': arrTime,
-      'observations': observations,
+      'date': date,
+      'type': type,
+      'duration': duration,
+      'calories': calories,
+      'category': category,
+      'description': description
     };
+    if (id != -1) map['id'] = id;
     if (v != -1) map['v'] = v;
     return map;
   }
 
-  TripLeg.fromMap(Map<String, Object?> map)
-      : trainNum = map['trainNum'] as String,
-        depStation = map['depStation'] as String,
-        arrStation = map['arrStation'] as String,
-        depTime = map['depTime'] as String,
-        arrTime = map['arrTime'] as String,
-        observations = map['observations'] as String,
-        v = map.containsKey('v') ? map['v'] as int : -1;
+  FitnessActivity.fromMap(Map<String, Object?> map)
+      : id = map.containsKey('id') ? map['id'] as int : -1,
+        date = map['date'] as String,
+        type = map['type'] as String,
+        duration = double.parse(map['duration'].toString()),
+        calories = double.parse(map['calories'].toString()),
+        category = map['category'] as String,
+        description = map['description'] as String;
+  // v = map.containsKey('v') ? map['v'] as int : -1;
 }

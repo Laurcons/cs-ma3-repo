@@ -18,7 +18,7 @@ class Repository {
   }
 
   bool get resetDb {
-    return false;
+    return true;
   }
 
   Database? db;
@@ -34,20 +34,18 @@ class Repository {
 
     if (resetDb) {
       await db!.execute("CREATE TABLE TripLegs ("
-          // "id INTEGER PRIMARY KEY,"
-          "trainNum TEXT,"
-          "depStation TEXT,"
-          "arrStation TEXT,"
-          "depTime TEXT,"
-          "arrTime TEXT,"
-          "observations TEXT,"
+          "id INTEGER PRIMARY KEY,"
+          "date TEXT,"
+          "type TEXT,"
+          "duration REAL,"
+          "calories REAL,"
+          "category TEXT,"
+          "description TEXT,"
           "v INTEGER"
           ");");
-
-      await db!.execute("INSERT INTO TripLegs VALUES"
-          "(\"IR1765\", \"Cluj-Napoca\", \"Iasi\", \"12:34\", \"23:45\", \"i hate this\", 0),"
-          "(\"R1234\", \"Unirea hc\", \"Bucuresti Nord (ew)\", \"01:23\", \"04:11\", \"BLEH BUCURESTI\", 0)"
-          ";");
+      await db!.execute("CREATE TABLE Dates ("
+          "date TEXT"
+          ");");
     }
 
     log("Repo init end");
@@ -91,19 +89,33 @@ class Repository {
    * THANKS
    */
 
-  Future<List<TripLeg>> findAll() async {
-    var maps = await db!.query('TripLegs');
-    return maps.map<TripLeg>(TripLeg.fromMap).toList();
+  Future<List<String>> findDates() async {
+    var maps = await db!.query('Dates');
+    return maps.map<String>((m) => m['date'] as String).toList();
   }
 
-  insertOne(TripLeg leg) async {
+  persistDates(List<String> dates) async {
+    await db!.delete('Dates');
+    await Future.wait(dates.map((d) async {
+      log('Inserting date $d');
+      await db!.insert('Dates', {'date': d});
+    }));
+  }
+
+  Future<List<FitnessActivity>> findAllForDate(String date) async {
+    var maps =
+        await db!.query('TripLegs', where: 'date = ?', whereArgs: [date]);
+    return maps.map<FitnessActivity>(FitnessActivity.fromMap).toList();
+  }
+
+  insertOne(FitnessActivity leg) async {
     await db!.insert('TripLegs', leg.toMap());
   }
 
-  Future<bool> tryInsertOne(TripLeg leg) async {
-    final existing = await db!
-        .query('TripLegs', where: 'trainNum = ?', whereArgs: [leg.trainNum]);
-    log('train num ${leg.trainNum} count ${existing.length}');
+  Future<bool> tryInsertOne(FitnessActivity leg) async {
+    final existing =
+        await db!.query('TripLegs', where: 'id = ?', whereArgs: [leg.id]);
+    log('train num ${leg.id} count ${existing.length}');
     if (existing.isEmpty) {
       await insertOne(leg);
       return true;
@@ -111,26 +123,31 @@ class Repository {
     return false;
   }
 
-  updateOne(String trainNum, TripLeg leg) async {
-    await db!.update('TripLegs', leg.toMap(),
-        where: 'trainNum = ?', whereArgs: [trainNum]);
+  updateOne(int id, FitnessActivity leg) async {
+    await db!.update('TripLegs', leg.toMap(), where: 'id = ?', whereArgs: [id]);
   }
 
-  deleteOne(String trainNum) async {
-    await db!.delete('TripLegs', where: 'trainNum = ?', whereArgs: [trainNum]);
+  deleteOne(int id) async {
+    await db!.delete('TripLegs', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<bool> tryDeleteOne(String trainNum) async {
-    return await db!
-            .delete('TripLegs', where: 'trainNum = ?', whereArgs: [trainNum]) !=
-        0;
+  Future<bool> tryDeleteOne(int id) async {
+    return await db!.delete('TripLegs', where: 'id = ?', whereArgs: [id]) != 0;
   }
 
-  resetWithNewList(List<TripLeg> legs) async {
+  resetWithNewList(List<FitnessActivity> legs) async {
     log('Resetting db with ${legs.length} entities');
     await db!.delete('TripLegs');
-    await Future.wait(legs.map((l) async {
-      await insertOne(l);
+    await Future.wait(legs.map((leg) async {
+      final existing =
+          await db!.query('TripLegs', where: 'id = ?', whereArgs: [leg.id]);
+      log('id ${leg.id} count ${existing.length}');
+      if (existing.isEmpty) {
+        await insertOne(leg);
+      } else {
+        final existingLegs = existing.map(FitnessActivity.fromMap).toList();
+        await updateOne(existingLegs[0].id, leg);
+      }
     }));
   }
 }

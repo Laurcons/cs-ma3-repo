@@ -4,9 +4,9 @@ import 'package:uionly_flutter/trip_legs/add_trip_leg_view.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg.dart';
 
 class TripLegListItem extends StatelessWidget {
-  final TripLeg leg;
-  final Function(TripLeg) onDelete;
-  final Function(String, TripLeg) onEdit;
+  final FitnessActivity leg;
+  final Function(FitnessActivity) onDelete;
+  final Function(int, FitnessActivity) onEdit;
 
   const TripLegListItem(this.leg,
       {super.key, required this.onEdit, required this.onDelete});
@@ -15,8 +15,9 @@ class TripLegListItem extends StatelessWidget {
     return await showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-                title: const Text("Are you f**** sure?"),
-                content: const Text("Are you sure you want to delet this?"),
+                title: const Text("Are you for realsies, sure?"),
+                content: const Text(
+                    "Are you sure you want to delete this? Really really sure?"),
                 actions: [
                   ElevatedButton(
                       onPressed: () {
@@ -43,12 +44,8 @@ class TripLegListItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Chip(
-                    label: Text(leg.trainNum,
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
-                    backgroundColor: leg.colorFromRank(),
-                  ),
+                  Text(leg.type,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   PopupMenuButton(
                       itemBuilder: (ctx) => [
                             PopupMenuItem(
@@ -61,7 +58,7 @@ class TripLegListItem extends StatelessWidget {
                                           builder: (ctx) =>
                                               AddTripLegView(leg)));
                                   if (result == null) return;
-                                  onEdit(leg.trainNum, result);
+                                  onEdit(leg.id, result);
                                 }),
                             PopupMenuItem(
                               value: 'delete',
@@ -78,15 +75,22 @@ class TripLegListItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(leg.depTime, style: const TextStyle(fontSize: 20)),
-                  Text(leg.arrTime, style: const TextStyle(fontSize: 20))
+                  Chip(
+                    label: Text(leg.category,
+                        style: const TextStyle(color: Colors.white)),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                  Text(leg.date),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [Text(leg.depStation), Text(leg.arrStation)],
+                children: [
+                  Text('${leg.duration} min'),
+                  Text('${leg.calories} cal')
+                ],
               ),
-              Text(leg.observations),
+              Text(leg.description),
             ],
           )),
     );

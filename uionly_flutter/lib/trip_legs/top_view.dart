@@ -1,4 +1,6 @@
+import 'dart:collection';
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:uionly_flutter/src/api.dart';
@@ -7,36 +9,37 @@ import 'package:uionly_flutter/src/repository.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg_list_item.dart';
 
-class ProgressView extends StatefulWidget {
-  const ProgressView({super.key});
+class TopView extends StatefulWidget {
+  const TopView({super.key});
 
   @override
   State<StatefulWidget> createState() => _State();
 }
 
-class _State extends State<ProgressView> {
+class _State extends State<TopView> {
   void initState() {
     super.initState();
     processData();
   }
 
-  Map<String, double> durations = {};
+  Map<String, int> categories = {};
   bool isLoading = true;
 
   Future<void> processData() async {
     final allActivities = await IHateAPI.fetchAll();
     allActivities.forEach((activ) {
-      final month = activ.date.substring(0, 7);
-      if (durations.containsKey(month)) {
-        var prev = durations[month]!;
-        prev += activ.duration;
-        durations[month] = prev;
+      if (categories.containsKey(activ.category)) {
+        var prev = categories[activ.category]!;
+        prev += 1;
+        categories[activ.category] = prev;
       } else {
-        durations[month] = activ.duration;
+        categories[activ.category] = 1;
       }
     });
-    final dur = setState(() {
-      durations = durations;
+    setState(() {
+      var sortedKeys = categories.keys.toList(growable: false)
+        ..sort((k1, k2) => -1 * categories[k1]!.compareTo(categories[k2]!));
+      categories = {for (var k in sortedKeys) k: categories[k]!};
       isLoading = false;
     });
   }
@@ -57,16 +60,14 @@ class _State extends State<ProgressView> {
                     : [
                         Expanded(
                             child: ListView.builder(
-                          itemCount: durations.length,
+                          itemCount: min(3, categories.length),
+                          // itemCount: categories.length,
                           itemBuilder: (ctx, idx) {
-                            final key = durations.keys.elementAt(idx);
-                            final value = durations[key];
+                            final key = categories.keys.elementAt(idx);
+                            final value = categories[key];
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text('Month $key'),
-                                Text('Duration $value')
-                              ],
+                              children: [Text(key), Text('Activities $value')],
                             );
                           },
                         ))

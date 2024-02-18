@@ -5,7 +5,7 @@ import 'package:uionly_flutter/src/repository.dart';
 import 'package:uionly_flutter/trip_legs/trip_leg.dart';
 
 class AddTripLegView extends StatefulWidget {
-  final TripLeg? leg;
+  final FitnessActivity? leg;
 
   const AddTripLegView(this.leg, {super.key});
 
@@ -15,23 +15,23 @@ class AddTripLegView extends StatefulWidget {
 
 class _State extends State<AddTripLegView> {
   final _formKey = GlobalKey<FormState>();
-  final trainNum = TextEditingController();
-  final depStation = TextEditingController();
-  final arrStation = TextEditingController();
-  final depTime = TextEditingController();
-  final arrTime = TextEditingController();
-  final observations = TextEditingController();
+  final date = TextEditingController();
+  final type = TextEditingController();
+  final duration = TextEditingController();
+  final calories = TextEditingController();
+  final category = TextEditingController();
+  final description = TextEditingController();
 
   @override
   void initState() {
     if (widget.leg != null) {
       final leg = widget.leg!;
-      trainNum.text = leg.trainNum;
-      depStation.text = leg.depStation;
-      arrStation.text = leg.arrStation;
-      depTime.text = leg.depTime;
-      arrTime.text = leg.arrTime;
-      observations.text = leg.observations;
+      date.text = leg.date;
+      type.text = leg.type;
+      duration.text = leg.duration.toString();
+      calories.text = leg.calories.toString();
+      category.text = leg.category;
+      description.text = leg.description;
     }
   }
 
@@ -40,7 +40,7 @@ class _State extends State<AddTripLegView> {
     return Scaffold(
         appBar: AppBar(
             title: Text(
-                widget.leg == null ? "Add a trip leg" : "Edit a trip leg")),
+                widget.leg == null ? "Add an activity" : "Edit a trip leg")),
         body: Form(
           key: _formKey,
           child: Padding(
@@ -49,16 +49,11 @@ class _State extends State<AddTripLegView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
-                      controller: trainNum,
-                      decoration:
-                          const InputDecoration(hintText: 'Train number'),
+                      controller: type,
+                      decoration: const InputDecoration(hintText: 'Type'),
                       validator: (String? text) {
                         if (text == null) {
                           return 'Please write something. You stupid.';
-                        }
-                        if (!RegExp("^(IR|IC|R) ?[0-9]{3,6}\$")
-                            .hasMatch(text)) {
-                          return 'Your train number is invalid. Please look on your ticket.';
                         }
                         return null;
                       },
@@ -68,18 +63,18 @@ class _State extends State<AddTripLegView> {
                       children: [
                         Expanded(
                             child: TextFormField(
-                          controller: depStation,
+                          controller: duration,
                           decoration:
-                              const InputDecoration(hintText: 'From Station'),
+                              const InputDecoration(hintText: 'Duration'),
                           validator: (str) => str!.isNotEmpty
                               ? null
                               : 'Please type something idiot',
                         )),
                         Expanded(
                             child: TextFormField(
-                          controller: arrStation,
+                          controller: calories,
                           decoration:
-                              const InputDecoration(hintText: 'To Station'),
+                              const InputDecoration(hintText: 'Calories'),
                           validator: (str) => str!.isNotEmpty
                               ? null
                               : 'Please type something idiot',
@@ -91,18 +86,17 @@ class _State extends State<AddTripLegView> {
                       children: [
                         Expanded(
                             child: TextFormField(
-                          controller: depTime,
-                          decoration:
-                              const InputDecoration(hintText: 'From Time'),
+                          controller: date,
+                          decoration: const InputDecoration(hintText: 'Date'),
                           validator: (str) => str!.isNotEmpty
                               ? null
                               : 'Please type something idiot',
                         )),
                         Expanded(
                             child: TextFormField(
-                          controller: arrTime,
+                          controller: category,
                           decoration:
-                              const InputDecoration(hintText: 'To Time'),
+                              const InputDecoration(hintText: 'Category'),
                           validator: (str) => str!.isNotEmpty
                               ? null
                               : 'Please type something idiot',
@@ -114,30 +108,30 @@ class _State extends State<AddTripLegView> {
                       children: [
                         Expanded(
                             child: TextFormField(
-                          controller: observations,
+                          controller: description,
                           decoration:
-                              const InputDecoration(hintText: 'Observations'),
+                              const InputDecoration(hintText: 'Description'),
                         )),
                       ],
                     ),
                     ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            var leg = TripLeg(
-                              trainNum.text,
-                              depStation.text,
-                              arrStation.text,
-                              depTime.text,
-                              arrTime.text,
-                              observations.text,
+                            var leg = FitnessActivity(
+                              date.text,
+                              type.text,
+                              double.parse(duration.text),
+                              double.parse(calories.text),
+                              category.text,
+                              description.text,
                             );
                             Repository.tryDatabaseOp(context, () async {
                               if (widget.leg != null) {
                                 await Repository.instance
-                                    .updateOne(widget.leg!.trainNum, leg);
+                                    .updateOne(widget.leg!.id, leg);
                                 await OpLog.instance.addAndTryOperation(
-                                    UpdateOperation(widget.leg!.trainNum,
-                                        widget.leg!.v, leg));
+                                    UpdateOperation(
+                                        widget.leg!.id, widget.leg!.v, leg));
                                 // await IHateAPI.update(
                                 //     widget.leg!.trainNum, widget.leg!.v, leg);
                               } else {

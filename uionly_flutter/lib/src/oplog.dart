@@ -37,7 +37,7 @@ abstract class Operation {
 }
 
 class CreateOperation extends Operation {
-  final TripLeg leg;
+  final FitnessActivity leg;
   CreateOperation(this.leg);
 
   @override
@@ -47,24 +47,24 @@ class CreateOperation extends Operation {
 }
 
 class UpdateOperation extends Operation {
-  final String trainNum;
+  final int id;
   final int v;
-  final TripLeg updates;
-  UpdateOperation(this.trainNum, this.v, this.updates);
+  final FitnessActivity updates;
+  UpdateOperation(this.id, this.v, this.updates);
 
   @override
   Future operate() async {
-    await IHateAPI.update(trainNum, v, updates);
+    await IHateAPI.update(id, v, updates);
   }
 }
 
 class DeleteOperation extends Operation {
-  final String trainNum;
+  final int id;
   final int v;
-  DeleteOperation(this.trainNum, this.v);
+  DeleteOperation(this.id, this.v);
 
   @override
   Future operate() async {
-    await IHateAPI.deleteOne(trainNum, v);
+    await IHateAPI.deleteOne(id, v);
   }
 }
